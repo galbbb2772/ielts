@@ -135,7 +135,7 @@ body.bluebg #exam,body.bluebg .pane,body.bluebg #questionPane{background:#eef7ff
   <div class="launch-card">
     <div class="launch-head">
       <div class="ielts-mark">IELTS</div>
-      <div class="practice-note"><a href="index.html" style="color:#1f6f93;font-weight:700;text-decoration:none">Research Dashboard</a> · Computer Practice Simulator · unofficial training build</div>
+      <div class="practice-note"><a href="javascript:void(0)" onclick="if(window.parent!==window&&window.parent.switchMode){window.parent.switchMode('research')}else{location.href='index.html'}" style="color:#1f6f93;font-weight:700;text-decoration:none">Research Dashboard</a> · Computer Practice Simulator · unofficial training build</div>
     </div>
     <div class="launch-body">
       <h1>Academic Reading Practice</h1>
@@ -191,7 +191,7 @@ body.bluebg #exam,body.bluebg .pane,body.bluebg #questionPane{background:#eef7ff
 
 <section id="result" class="hidden">
   <div class="result-wrap">
-    <div class="result-head"><div><div class="ielts-mark">IELTS</div><b>Practice Review</b></div><div style="display:flex;gap:8px"><button onclick="location.href='index.html'">Research Dashboard</button><button onclick="location.reload()">New session</button></div></div>
+    <div class="result-head"><div><div class="ielts-mark">IELTS</div><b>Practice Review</b></div><div style="display:flex;gap:8px"><button onclick="if(window.parent!==window&&window.parent.switchMode){window.parent.switchMode('research')}else{location.href='index.html'}">Research Dashboard</button><button onclick="location.reload()">New session</button></div></div>
     <div class="result-body">
       <div class="metrics">
         <div class="metric"><small>Accuracy</small><b id="mAcc">—</b></div>
@@ -468,7 +468,7 @@ function submitExam(auto){
  document.getElementById("mTime").textContent=formatTime(elapsed);document.getElementById("mWeak").textContent=weak;
  document.getElementById("errGrid").innerHTML=Object.entries(errs).map(([k,v])=>`<div class="err"><small>${labels[k]}</small><b>${v}</b></div>`).join("");
  document.getElementById("reviewRows").innerHTML=rows.map(r=>`<tr><td>${r.q.n}</td><td>${r.q.point}</td><td class="${r.ok?"ok":"wrong"}">${escapeHTML(r.ua||"Blank")}</td><td>${escapeHTML(r.q.a)}</td><td>${r.ok?'<span class="ok">Correct</span>':escapeHTML(r.q.exp)}</td></tr>`).join("");
- const hist=JSON.parse(localStorage.getItem("ieltsExamHistory")||"[]");hist.push({date:new Date().toISOString(),count:activeQs.length,correct:correct,acc:acc,elapsed:elapsed,errs:errs,wrong:rows.filter(function(r){return !r.ok}).map(function(r){return {n:r.q.n,point:r.q.point,user:r.ua,answer:r.q.a,err:r.q.err,exp:r.q.exp};})});localStorage.setItem("ieltsExamHistory",JSON.stringify(hist));
+ const hist=JSON.parse(localStorage.getItem("ieltsExamHistory")||"[]");hist.push({date:new Date().toISOString(),count:activeQs.length,correct:correct,acc:acc,elapsed:elapsed,errs:errs,wrong:rows.filter(function(r){return !r.ok}).map(function(r){return {n:r.q.n,point:r.q.point,user:r.ua,answer:r.q.a,err:r.q.err,exp:r.q.exp};})});localStorage.setItem("ieltsExamHistory",JSON.stringify(hist));try{if(window.parent!==window)window.parent.postMessage({type:"IELTS_EXAM_SUBMITTED"},"*")}catch(e){}
 }
 function normalize(s){return String(s).trim().toLowerCase().replace(/[.。]$/,"")}
 function formatTime(s){return `${Math.floor(s/60)}m ${s%60}s`}
