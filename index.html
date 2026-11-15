@@ -1,477 +1,102 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IELTS Computer Practice Simulator</title>
+<title>IELTS Research Lab</title>
 <style>
-:root{
-  --ink:#222;--muted:#6a6a6a;--line:#c7ccd1;--soft:#eef1f4;--paper:#fff;
-  --bar:#222a2f;--bar2:#343c42;--blue:#e9f4fb;--blue2:#1b78a6;--red:#d71920;
-  --nav:#e7edf2;--yellow:#fff18a;--review:#f4c542;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#eef1f4}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-
-/* launcher */
-#launcher{min-height:100vh;background:#f3f4f5;display:flex;align-items:center;justify-content:center;padding:24px}
-.launch-card{width:min(760px,100%);background:white;border:1px solid #c9cdd1;box-shadow:0 8px 28px rgba(0,0,0,.12)}
-.launch-head{padding:22px 26px;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between}
-.ielts-mark{font-weight:900;font-size:28px;letter-spacing:-2px;color:var(--red)}
-.practice-note{font-size:12px;color:#666}
-.launch-body{padding:26px}
-.launch-body h1{font-size:24px;margin:0 0 8px}.launch-body p{line-height:1.6;color:#555}
-.launch-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}
-.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
-.field select{width:100%;padding:11px;border:1px solid #aeb4b9;background:#fff}
-.start-btn{background:#1f6f93;border:0;color:#fff;font-weight:700;padding:12px 22px;border-radius:2px}
-.launch-small{font-size:12px;color:#777;margin-top:16px;line-height:1.5}
-
-/* exam shell */
-#exam{height:100vh;display:flex;flex-direction:column;background:white;overflow:hidden}
-.topline{height:58px;background:linear-gradient(#343d43,#20272c);color:#fff;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 14px;border-bottom:3px solid #73a7c2}
-.identity{display:flex;align-items:center;gap:14px;min-width:0}
-.identity .ielts-mark{font-size:27px;letter-spacing:-2px}
-.test-id{font-size:12px;line-height:1.35;color:#fff;white-space:nowrap}
-.clock{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.clock-icon{width:18px;height:18px;border:2px solid #fff;border-radius:50%;position:relative}
-.clock-icon:before{content:"";position:absolute;width:2px;height:6px;background:#fff;left:7px;top:3px}
-.clock-icon:after{content:"";position:absolute;width:5px;height:2px;background:#fff;left:7px;top:8px;transform:rotate(20deg);transform-origin:left center}
-.actions{justify-self:end;display:flex;gap:7px}
-.topbtn{background:#f6f6f6;color:#222;border:1px solid #aaa;border-radius:3px;padding:6px 12px;font-weight:700;font-size:12px}
-.topbtn:hover{background:#fff}
-.section-banner{background:#f0f1ef;border-bottom:1px solid #bfc4c7;padding:11px 18px;min-height:58px}
-.section-banner b{display:block;font-size:17px;margin-bottom:5px}
-.section-banner span{font-size:14px}
-.workarea{flex:1;min-height:0;display:flex;position:relative;background:#fff}
-.pane{min-width:220px;overflow:auto;padding:22px 24px 80px}
-#passagePane{width:50%;border-right:1px solid #aeb4b8}
-#questionPane{flex:1;background:#f5f7fa}
-.divider{width:7px;margin-left:-4px;cursor:col-resize;background:transparent;position:relative;z-index:4}
-.divider:hover,.divider.dragging{background:#b7c2c9}
-.divider:after{content:"↔";position:absolute;top:50%;left:-11px;width:28px;height:26px;display:grid;place-items:center;background:#e5e8ea;border:1px solid #999;font-size:12px}
-.passage-title{text-align:center;font-weight:700;font-size:18px;margin:4px 0 22px}
-.passage-text{font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.58}
-.passage-text p{margin:0 0 16px}
-.passage-text .para-label{font-weight:bold;margin-right:10px}
-.instructions{font-size:13px;line-height:1.45;margin-bottom:20px}
-.instructions strong{display:block;margin-bottom:4px}
-.qgroup-title{font-weight:700;font-size:14px;margin:8px 0 10px}
-.q{background:#fff;border:1px solid #d8dde1;margin:0 0 11px;padding:12px 13px;font-size:13px;line-height:1.45}
-.q.active{outline:2px solid #2b86b2;background:#f8fcff}
-.qhead{display:flex;gap:8px;align-items:flex-start}
-.qnum{font-weight:700;min-width:22px}
-.opts{margin:9px 0 0 30px}
-.opt{display:block;margin:7px 0}
-.opt input{margin-right:7px}
-.answer-input{width:190px;border:1px solid #7b7f82;padding:5px 7px;margin-left:5px}
-.answer-input:focus{outline:2px solid #72b5d8;border-color:#327fa5}
-.review-check{margin-top:8px;margin-left:30px;font-size:12px;color:#555}
-.review-check input{vertical-align:middle}
-.highlight{background:var(--yellow)}
-.selection-menu{position:fixed;z-index:30;background:#fff;border:1px solid #999;box-shadow:0 2px 7px rgba(0,0,0,.22);font-size:12px}
-.selection-menu button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 14px}
-.selection-menu button:hover{background:#edf3f7}
-.note{position:absolute;z-index:20;width:230px;background:#fff58d;border:1px solid #d2bd36;box-shadow:0 5px 16px rgba(0,0,0,.22);padding:8px}
-.note textarea{width:100%;height:95px;border:0;background:transparent;resize:none;outline:none}
-.note-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
-.note-top button{border:0;background:transparent}
-
-/* bottom nav */
-.bottom{height:62px;background:#dfe8ef;border-top:1px solid #a9b7c2;display:flex;align-items:center;gap:8px;padding:6px 10px;overflow-x:auto}
-.part-label{font-size:13px;font-weight:700;white-space:nowrap;margin-right:3px}
-.qnav{width:26px;height:28px;background:#fff;border:1px solid #a8afb4;border-radius:2px;font-weight:700;font-size:11px;position:relative;flex:none}
-.qnav.answered{background:#5c646b;color:#fff;border-color:#495057}
-.qnav.review:after{content:"";width:8px;height:8px;border-radius:50%;background:var(--review);position:absolute;right:-3px;top:-3px;border:1px solid #9b7b00}
-.qnav.current{outline:2px solid #1681b1}
-.navspacer{width:6px;flex:none}
-.navarrow{margin-left:auto;border:1px solid #89939b;background:#f8f8f8;width:34px;height:34px;border-radius:50%;font-size:18px;flex:none}
-.navarrow + .navarrow{margin-left:0}
-#prevBtn{margin-left:auto}
-
-/* overlays */
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:50;display:grid;place-items:center}
-.modal{width:min(560px,92vw);background:#fff;border:1px solid #888;box-shadow:0 12px 35px rgba(0,0,0,.3)}
-.modal h3{margin:0;padding:13px 16px;background:#e8ecef;border-bottom:1px solid #bbb;font-size:16px}
-.modal-body{padding:18px;font-size:13px;line-height:1.55}
-.modal-foot{padding:12px 16px;border-top:1px solid #ddd;text-align:right}
-.modal-foot button,.modal-body button{padding:7px 13px}
-.setting-row{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:center;margin:10px 0}
-.hide-screen{position:fixed;inset:58px 0 0;background:#e8edf1;z-index:40;display:grid;place-items:center}
-.hide-box{text-align:center}.hide-box h2{font-size:22px}.resume{padding:10px 20px;background:#2b6e91;color:#fff;border:0;font-weight:700}
-
-/* result */
-#result{min-height:100vh;background:#f4f5f6;padding:30px}
-.result-wrap{max-width:1050px;margin:auto;background:#fff;border:1px solid #c9cdd1}
-.result-head{padding:22px 26px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center}
-.result-body{padding:24px}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.metric{border:1px solid #ccd1d5;padding:15px}.metric small{color:#666}.metric b{display:block;font-size:26px;margin-top:5px}
-.errgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}
-.err{border:1px solid #d6dadd;padding:12px}.err b{font-size:22px;display:block}
-.review-table{width:100%;border-collapse:collapse;font-size:13px}
-.review-table th,.review-table td{border-bottom:1px solid #ddd;padding:9px;vertical-align:top;text-align:left}
-.ok{color:#198754}.wrong{color:#c62828}
-
-/* font themes */
-body.large .passage-text,body.large .q{font-size:17px}
-body.xlarge .passage-text,body.xlarge .q{font-size:19px}
-body.warm #exam,body.warm .pane,body.warm #questionPane{background:#fffbea}
-body.bluebg #exam,body.bluebg .pane,body.bluebg #questionPane{background:#eef7ff}
-
-@media(max-width:800px){
-  .topline{grid-template-columns:1fr auto}.clock{grid-column:2}.actions{grid-column:1/-1;position:absolute;right:8px;top:62px;z-index:10}.topbtn{padding:5px 8px}
-  .workarea{flex-direction:column}.divider{display:none}#passagePane{width:100%!important;height:48%;border-right:0;border-bottom:2px solid #aaa}#questionPane{height:52%}
-  .metrics,.errgrid{grid-template-columns:1fr 1fr}.launch-grid{grid-template-columns:1fr}
-}
+:root{--bg:#08111f;--panel:#101c2d;--line:#243955;--text:#f4f7fb;--muted:#8fa3bd;--cyan:#64d9ed;--blue:#6aa8ff;--green:#52d69b;--yellow:#f4cf67;--red:#f27c89}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(900px 600px at 15% -15%,rgba(82,154,255,.18),transparent 55%),linear-gradient(180deg,#08111f,#0a1525 50%,#07101c);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:242px 1fr}.side{height:100vh;position:sticky;top:0;padding:20px 14px;border-right:1px solid var(--line);background:rgba(7,16,29,.82);backdrop-filter:blur(16px)}
+.brand{padding:8px 10px 24px}.brand b{font-size:18px}.brand span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.nav{display:block;width:100%;border:1px solid transparent;background:transparent;color:#aebed2;text-align:left;padding:11px 12px;border-radius:11px;margin:3px 0;cursor:pointer;text-decoration:none}.nav:hover,.nav.active{background:#11243b;border-color:#203b5c;color:#fff}
+.sidebox{position:absolute;left:14px;right:14px;bottom:16px;border:1px solid var(--line);border-radius:14px;padding:13px;background:#0b1929}.sidebox small{color:var(--muted);line-height:1.5}.main{padding:27px 30px 70px;max-width:1450px;width:100%}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:19px}.eyebrow{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:1.4px}.top h1{font-size:30px;margin:5px 0 5px}.top p{color:var(--muted);margin:0}.actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:1px solid #365477;background:#11233b;color:#fff;border-radius:11px;padding:10px 14px;cursor:pointer;text-decoration:none;font-size:13px;font-weight:700}.btn.primary{border:0;background:linear-gradient(135deg,#69e0ec,#68a9ff);color:#07101c}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}.card{background:linear-gradient(180deg,rgba(16,28,45,.95),rgba(11,23,39,.95));border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.19)}.hero{grid-column:span 8;padding:22px}.hero h2{font-size:22px;margin:7px 0}.hero p{color:#a6b5c8;line-height:1.7;margin:0}.mission{margin-top:16px;padding:15px;border:1px solid #284765;background:#0b1c30;border-radius:14px}.mission b{display:block;margin-bottom:5px}.mission span{color:#a9bbd0;font-size:13px}
+.kpis{grid-column:span 4;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}.kpi{background:#0b192b;border:1px solid #1f3857;border-radius:14px;padding:13px}.kpi label{color:var(--muted);font-size:11px}.kpi b{display:block;font-size:24px;margin-top:5px}
+.section{padding:19px}.builder{grid-column:1/-1}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.head h3{font-size:17px;margin:0}.head span{color:var(--muted);font-size:12px}.controls{display:grid;grid-template-columns:1fr 1fr 1.3fr auto;gap:11px}.control label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}.control select{width:100%;padding:10px;border-radius:10px;border:1px solid #2b486a;background:#091727;color:#fff}
+.engines{grid-column:span 7}.errors{grid-column:span 5}.engine{display:grid;grid-template-columns:115px 1fr 75px;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #203652}.engine:last-child{border-bottom:0}.bar{height:8px;border-radius:99px;background:#071523;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#65dbe9,#6d9fff)}.engine small{color:var(--muted);text-align:right}
+.errrow{display:grid;grid-template-columns:78px 1fr 36px;gap:8px;align-items:center;margin:12px 0}.errrow label{font-size:12px;color:#b9c7d8}.errbar{height:10px;background:#071523;border-radius:99px;overflow:hidden}.errfill{height:100%;background:linear-gradient(90deg,#f1c86a,#f58b75)}
+.history{grid-column:span 7}.wrongbox{grid-column:span 5}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px;border-bottom:1px solid #203550;text-align:left;vertical-align:top}th{color:#90a4bd}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#162b46;color:#bcd0e6;font-size:11px}.good{color:var(--green)}.bad{color:var(--red)}
+.wrongitem{padding:11px 0;border-bottom:1px solid #203550}.wrongitem:last-child{border-bottom:0}.wrongitem b{font-size:12px}.wrongitem p{font-size:12px;color:#a9b9cb;line-height:1.5;margin:5px 0}.wrongmeta{display:flex;gap:7px;flex-wrap:wrap}.library{grid-column:1/-1}.libgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.lib{padding:14px;border:1px solid #243e60;background:#0b192b;border-radius:14px}.lib b{font-size:13px}.lib p{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0}.empty{padding:24px 8px;color:var(--muted);text-align:center}
+@media(max-width:1050px){.app{grid-template-columns:1fr}.side{display:none}.main{padding:18px}.hero,.kpis,.engines,.errors,.history,.wrongbox{grid-column:1/-1}.controls{grid-template-columns:1fr 1fr}.controls .btn{grid-column:1/-1}.libgrid{grid-template-columns:1fr}}
+@media(max-width:620px){.main{padding:12px}.top{flex-direction:column}.top h1{font-size:25px}.controls{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.engine{grid-template-columns:90px 1fr 60px}}
 </style>
 </head>
 <body>
-
-<section id="launcher">
-  <div class="launch-card">
-    <div class="launch-head">
-      <div class="ielts-mark">IELTS</div>
-      <div class="practice-note">Computer Practice Simulator · unofficial training build</div>
-    </div>
-    <div class="launch-body">
-      <h1>Academic Reading Practice</h1>
-      <p>Use an exam-style screen first. Analysis appears only after you submit, so the practice phase stays close to test-day conditions.</p>
-      <div class="launch-grid">
-        <div class="field"><label>Practice length</label>
-          <select id="lengthSelect">
-            <option value="40" selected>Full Reading · 40 questions · 60 min</option>
-            <option value="20">Half session · 20 questions · 30 min</option>
-            <option value="10">Focused session · 10 questions · 15 min</option>
-          </select>
-        </div>
-        <div class="field"><label>Starting passage</label>
-          <select id="startPart"><option value="1">Part 1</option><option value="2">Part 2</option><option value="3">Part 3</option></select>
-        </div>
-      </div>
-      <button class="start-btn" onclick="startExam()">Start test</button>
-      <div class="launch-small">Interface is a practice simulation based on publicly documented IELTS-on-computer functions. Practice passages and questions are original and are not official IELTS test content.</div>
-    </div>
-  </div>
-</section>
-
-<section id="exam" class="hidden">
-  <header class="topline">
-    <div class="identity">
-      <div class="ielts-mark">IELTS</div>
-      <div class="test-id">Test taker ID<br><b>PRACTICE-2026</b></div>
-    </div>
-    <div class="clock"><span class="clock-icon"></span><span id="clockText">60 minutes left</span></div>
-    <div class="actions">
-      <button class="topbtn" onclick="submitExam(false)">Submit</button>
-      <button class="topbtn" onclick="openHelp()">Help</button>
-      <button class="topbtn" onclick="hideTest()">Hide</button>
-      <button class="topbtn" onclick="openSettings()">Settings</button>
-    </div>
-  </header>
-  <div class="section-banner"><b id="partTitle">Part 1</b><span id="partInstruction">Read the text and answer questions 1–13.</span></div>
-
-  <main class="workarea">
-    <section class="pane" id="passagePane">
-      <div class="passage-title" id="passageTitle"></div>
-      <div class="passage-text" id="passageText"></div>
-    </section>
-    <div class="divider" id="divider"></div>
-    <section class="pane" id="questionPane">
-      <div class="instructions" id="instructions"></div>
-      <div id="questions"></div>
-    </section>
-  </main>
-
-  <footer class="bottom" id="bottomNav"></footer>
-</section>
-
-<section id="result" class="hidden">
-  <div class="result-wrap">
-    <div class="result-head"><div><div class="ielts-mark">IELTS</div><b>Practice Review</b></div><button onclick="location.reload()">New session</button></div>
-    <div class="result-body">
-      <div class="metrics">
-        <div class="metric"><small>Accuracy</small><b id="mAcc">—</b></div>
-        <div class="metric"><small>Correct</small><b id="mRaw">—</b></div>
-        <div class="metric"><small>Time used</small><b id="mTime">—</b></div>
-        <div class="metric"><small>Main weakness</small><b id="mWeak" style="font-size:18px">—</b></div>
-      </div>
-      <div class="errgrid" id="errGrid"></div>
-      <table class="review-table"><thead><tr><th>Q</th><th>Skill point</th><th>Your answer</th><th>Answer</th><th>Diagnosis</th></tr></thead><tbody id="reviewRows"></tbody></table>
-    </div>
-  </div>
-</section>
-
-<div id="helpModal" class="modal-back hidden">
-  <div class="modal"><h3>Help</h3><div class="modal-body">
-    <p><b>Navigation:</b> use the numbered buttons at the bottom to move between questions. You may return to questions at any time.</p>
-    <p><b>Review:</b> tick “Review” under a question to mark it for checking later.</p>
-    <p><b>Highlight / notes:</b> select text in the passage, then use the small menu. Highlights and notes do not affect scoring.</p>
-    <p><b>Answers:</b> spelling matters for typed completion answers.</p>
-  </div><div class="modal-foot"><button onclick="closeModal('helpModal')">Close</button></div></div>
+<div class="app">
+<aside class="side">
+<div class="brand"><b>IELTS RESEARCH LAB</b><span>学习研究台 · V3</span></div>
+<a class="nav active" href="#overview">总览</a>
+<a class="nav" href="#plan">今日训练</a>
+<a class="nav" href="#errors">错因中心</a>
+<a class="nav" href="#history">实验记录</a>
+<a class="nav" href="#wrong">错题研究</a>
+<a class="nav" href="exam.html">机考模拟器 ↗</a>
+<div class="sidebox"><small>这里负责观察与研究；真实机考页面只负责做题。两边共用同一份本地训练数据。</small></div>
+</aside>
+<main class="main">
+<div class="top" id="overview">
+<div><div class="eyebrow">RESEARCH → TEST → REVIEW → ITERATE</div><h1>IELTS 学习研究台</h1><p>先看哪里出问题，再决定今天练什么；真正做题时切换到独立的机考界面。</p></div>
+<div class="actions"><a class="btn primary" href="exam.html">进入 IELTS 机考模拟</a><button class="btn" onclick="refresh()">刷新数据</button></div>
 </div>
-
-<div id="settingsModal" class="modal-back hidden">
-  <div class="modal"><h3>Settings</h3><div class="modal-body">
-    <div class="setting-row"><b>Text size</b><select id="fontSetting" onchange="applySettings()"><option value="">Standard</option><option value="large">Large</option><option value="xlarge">Extra large</option></select></div>
-    <div class="setting-row"><b>Background</b><select id="bgSetting" onchange="applySettings()"><option value="">White</option><option value="warm">Warm</option><option value="bluebg">Light blue</option></select></div>
-  </div><div class="modal-foot"><button onclick="closeModal('settingsModal')">Close</button></div></div>
+<div class="grid">
+<section class="card hero">
+<div class="eyebrow">TODAY'S MISSION</div><h2 id="missionTitle">先建立 Reading Baseline</h2><p id="missionText">还没有足够数据。先跑一组 10 题，系统会根据错误类型决定下一轮训练方向。</p>
+<div class="mission"><b id="missionAction">建议：10题 · Part 1 · 标准训练</b><span id="missionWhy">目标不是刷题量，而是找出第一条稳定的错误模式。</span></div>
+</section>
+<section class="card kpis">
+<div class="kpi"><label>Sessions</label><b id="sessions">0</b></div><div class="kpi"><label>Questions</label><b id="questionsDone">0</b></div><div class="kpi"><label>Accuracy</label><b id="accuracy">—</b></div><div class="kpi"><label>Main Weakness</label><b id="weakness" style="font-size:16px">待采样</b></div>
+</section>
+<section class="card section builder" id="plan">
+<div class="head"><div><h3>生成今天的训练</h3><span>研究台决定训练参数，机考页负责执行。</span></div><span class="pill">Session Builder</span></div>
+<div class="controls">
+<div class="control"><label>题数</label><select id="len"><option value="10">10题 · 15分钟</option><option value="20">20题 · 30分钟</option><option value="40">40题 · 60分钟</option></select></div>
+<div class="control"><label>起始 Passage</label><select id="part"><option value="1">Part 1 · 相对基础</option><option value="2">Part 2 · 中段</option><option value="3">Part 3 · 高压</option></select></div>
+<div class="control"><label>本轮研究目标</label><select id="goal"><option>建立基线</option><option>减少定位错误</option><option>减少词汇错误</option><option>修复逻辑判断</option><option>专练 Not Given / 过度推断</option><option>控制时间压力</option></select></div>
+<button class="btn primary" onclick="launch()">进入考场</button>
 </div>
-
-<div id="hideScreen" class="hide-screen hidden"><div class="hide-box"><h2>Test hidden</h2><p>Your time continues to run.</p><button class="resume" onclick="resumeTest()">Resume test</button></div></div>
-<div id="selectionMenu" class="selection-menu hidden"><button onclick="highlightSelection()">Highlight</button><button onclick="makeNote()">Notes</button></div>
-
+</section>
+<section class="card section engines">
+<div class="head"><div><h3>四大能力引擎</h3><span>Reading 先进入数据化训练；其他模块后续接入同一系统。</span></div></div>
+<div class="engine"><b>Reading</b><div class="bar"><div class="fill" id="readingFill" style="width:15%"></div></div><small id="readingState">Baseline</small></div>
+<div class="engine"><b>Writing</b><div class="bar"><div class="fill" style="width:35%"></div></div><small>5.5*</small></div>
+<div class="engine"><b>Speaking</b><div class="bar"><div class="fill" style="width:30%"></div></div><small>5.0</small></div>
+<div class="engine"><b>Vocabulary</b><div class="bar"><div class="fill" style="width:48%"></div></div><small>50/day</small></div>
+</section>
+<section class="card section errors" id="errors"><div class="head"><div><h3>错因暴露</h3><span>累计错误分布</span></div></div><div id="errorBars"></div></section>
+<section class="card section history" id="history"><div class="head"><div><h3>最近实验记录</h3><span>每一轮机考就是一次 Forward 样本。</span></div></div><div class="tablewrap"><table><thead><tr><th>时间</th><th>题数</th><th>正确率</th><th>用时</th><th>主要错因</th></tr></thead><tbody id="historyRows"></tbody></table></div></section>
+<section class="card section wrongbox" id="wrong"><div class="head"><div><h3>最近错题研究</h3><span>从新版机考记录开始保存详细错题。</span></div></div><div id="wrongList"></div></section>
+<section class="card section library"><div class="head"><div><h3>当前题库</h3><span>原创 IELTS 风格材料；考试阶段不显示解析。</span></div><a class="btn" href="exam.html">打开题库做题</a></div>
+<div class="libgrid"><div class="lib"><b>The Quiet City Experiment</b><p>城市规划 / 环境心理学。覆盖 TFNG、细节定位、因果限制、填空。</p></div><div class="lib"><b>Why Memory Likes Friction</b><p>学习科学 / 记忆。覆盖绝对词、概念定义、同义替换和因果。</p></div><div class="lib"><b>Rebuilding Reefs with Sound</b><p>海洋生态。覆盖目的、风险、已知/未知判断与主旨。</p></div></div>
+</section>
+</div>
+</main>
+</div>
 <script>
-const parts=[
-{
-title:"The Quiet City Experiment",
-paras:[
-["A","In many large cities, noise is treated as an unavoidable side effect of economic activity. Yet a small group of urban planners has begun to question that assumption. Their concern is not simply that loud environments are unpleasant. They argue that constant low-level noise may influence concentration, sleep quality and even how long people choose to remain in public spaces."],
-["B","One closely watched experiment took place in a European district where traffic was redirected away from three residential streets for six months. The roads were not fully pedestrianised; delivery vehicles and local residents could still enter. However, through-traffic fell sharply, and average daytime noise dropped by roughly seven decibels."],
-["C","Researchers expected residents to report that the area felt calmer. What surprised them was the change in behaviour. People spent more time sitting outside, children remained in small public squares for longer, and local cafés recorded a modest increase in afternoon customers. The researchers cautioned that these changes did not prove that lower noise alone caused the behavioural shift, because the traffic reduction also made the streets feel safer."],
-["D","A second finding concerned adaptation. At the beginning of the trial, many residents noticed the quieter environment immediately. After several weeks, however, they stopped describing the area as quiet. Instead, quietness became the new normal. When normal traffic returned at the end of the experiment, complaints rose suddenly, even among people who had rarely complained before the trial."],
-["E","This suggests that expectations may influence the experience of noise as much as the sound level itself. A person who expects heavy traffic may tolerate it more easily than someone who has recently adapted to a calmer setting. For policy-makers, that creates a difficulty: once a city demonstrates that quieter streets are possible, residents may become less willing to accept the old conditions."],
-["F","The researchers therefore argue that noise policy should not be limited to measuring decibels. They recommend examining how people use spaces before and after changes, and whether quieter environments encourage activities that improve social life. The next stage of the study will compare several districts with different income levels to determine whether the same pattern appears elsewhere."]
-],
-questions:[
-qTF(1,"The researchers believed that noise was only a matter of comfort.","False","scope","logic","The passage says their concern was not simply that noise was unpleasant; it also mentions concentration and sleep."),
-qTF(2,"All vehicles were banned from the three residential streets.","False","detail","locate","Delivery vehicles and local residents could still enter."),
-qTF(3,"Average daytime noise fell by approximately seven decibels.","True","number","locate","Paragraph B states a drop of roughly seven decibels."),
-qTF(4,"The cafés increased their prices during the experiment.","Not Given","NG","overinfer","The text mentions more afternoon customers, not prices."),
-qTF(5,"Researchers proved that lower noise was the only cause of the behavioural change.","False","causation","logic","They explicitly caution that greater perceived safety may also have contributed."),
-qText(6,"After several weeks, quietness became the new ___.","normal","word completion","vocab","Paragraph D uses the phrase 'the new normal'."),
-qText(7,"When traffic returned, the number of ___ rose suddenly.","complaints","detail completion","locate","Paragraph D says complaints rose suddenly."),
-qText(8,"Policy-makers are advised not to measure only ___.","decibels","keyword completion","locate","Paragraph F says noise policy should not be limited to measuring decibels."),
-qText(9,"The next stage will compare districts with different ___ levels.","income","detail completion","locate","The final sentence refers to different income levels."),
-qMC(10,"What most surprised the researchers?",["The reduction in delivery vehicles","The change in how people used public spaces","The cost of the experiment","The fall in café prices"],"The change in how people used public spaces","main detail","locate","Paragraph C identifies the behavioural change as the surprise."),
-qMC(11,"Why were researchers cautious about the behavioural findings?",["The study was too short to measure noise","Traffic reduction also changed perceived safety","Residents were not interviewed","The cafés supplied the data"],"Traffic reduction also changed perceived safety","causal limitation","logic","Safety is a competing explanation."),
-qMC(12,"What does Paragraph E suggest?",["Expectations can affect how noise is experienced","People never adapt to quieter places","Heavy traffic is always tolerated","Noise measurements are inaccurate"],"Expectations can affect how noise is experienced","inference","logic","The paragraph directly links expectations with perceived noise."),
-qMC(13,"What is the researchers' recommended policy approach?",["Ban all vehicles","Measure only sound levels","Consider how people use public spaces as well as noise levels","Focus only on commercial areas"],"Consider how people use public spaces as well as noise levels","purpose","logic","Paragraph F recommends examining behaviour as well as decibels.")
-]},
-{
-title:"Why Memory Likes Friction",
-paras:[
-["A","Students often prefer learning methods that feel smooth. Re-reading a familiar page creates a sense of progress because the material becomes easier to process. Yet psychologists have repeatedly found that ease during study does not always predict what will be remembered later."],
-["B","One explanation is known as desirable difficulty. When learners have to retrieve information from memory, generate an answer, or distinguish between similar concepts, the task feels harder. That effort can strengthen the memory trace, provided the challenge is not so extreme that the learner repeatedly fails."],
-["C","A common example involves testing. Many students view a short quiz as a way to measure learning after study. In reality, trying to answer questions can itself produce learning. Even an unsuccessful attempt may be useful if correct feedback follows soon afterwards, because the learner becomes more sensitive to the difference between the guessed answer and the actual one."],
-["D","However, difficulty is not automatically beneficial. If a student lacks the basic vocabulary needed to understand a passage, adding time pressure may simply increase confusion. Productive difficulty must therefore be matched to the learner's current level. The same exercise can be useful for one student and wasteful for another."],
-["E","Researchers also warn against confusing familiarity with mastery. A paragraph that has been read five times may feel obvious, but that feeling can disappear when the book is closed. By contrast, a student who can explain the idea without looking at the text has stronger evidence of learning."],
-["F","This has practical consequences for revision. Instead of asking 'Does this look familiar?', learners can ask 'Can I produce the idea without help?' The second question is less comfortable, but it provides a more realistic estimate of what will survive into an exam."]
-],
-questions:[
-qTF(14,"Re-reading always produces stronger long-term memory.","False","absolute wording","logic","The passage says ease does not always predict later memory."),
-qTF(15,"Desirable difficulty should make a learner fail repeatedly.","False","definition","logic","The difficulty should not be so extreme that repeated failure occurs."),
-qTF(16,"Trying to retrieve information can itself strengthen learning.","True","concept detail","locate","Paragraph B links retrieval effort with a stronger memory trace."),
-qTF(17,"An unsuccessful answer attempt can never be useful.","False","absolute wording","logic","Paragraph C says an unsuccessful attempt may be useful if feedback follows."),
-qText(18,"Correct ___ should follow an unsuccessful attempt soon afterwards.","feedback","word completion","locate","Paragraph C says correct feedback should follow."),
-qText(19,"Productive difficulty must match the learner's current ___.","level","word completion","locate","Paragraph D uses 'current level'."),
-qText(20,"A lack of basic ___ may make added time pressure unhelpful.","vocabulary","detail completion","vocab","Paragraph D identifies basic vocabulary."),
-qText(21,"Researchers warn against confusing familiarity with ___.","mastery","contrast","vocab","Paragraph E contrasts familiarity with mastery."),
-qMC(22,"What is 'desirable difficulty'?",["Any task with a time limit","A manageable challenge requiring effort","A test that students always pass","Repeated re-reading"],"A manageable challenge requiring effort","definition","vocab","The challenge should require effort but remain manageable."),
-qMC(23,"Why can quizzes create learning?",["They remove the need for feedback","Retrieval itself can strengthen memory","They make text easier to read","They reduce vocabulary demands"],"Retrieval itself can strengthen memory","cause","logic","The act of trying to retrieve is part of learning."),
-qMC(24,"Why can familiarity be misleading?",["It may vanish when the text is no longer visible","It always makes people read more slowly","It prevents students from taking tests","It causes spelling mistakes"],"It may vanish when the text is no longer visible","evidence","logic","Paragraph E explains that familiarity may disappear when the book is closed."),
-qMC(25,"Which learner is showing stronger evidence of learning?",["One who has read the page five times","One who can explain the idea without looking","One who highlights every sentence","One who studies only under time pressure"],"One who can explain the idea without looking","application","logic","Producing the idea unaided is stronger evidence."),
-qMC(26,"What is the main purpose of the final paragraph?",["To reject testing","To recommend a more demanding self-check during revision","To advise students to stop reading","To compare school subjects"],"To recommend a more demanding self-check during revision","paragraph purpose","logic","It recommends asking whether you can produce the idea without help.")
-]},
-{
-title:"Rebuilding Reefs with Sound",
-paras:[
-["A","A healthy coral reef is not a quiet place. Fish calls, snapping shrimp and the movement of animals create a complex underwater soundscape. Damaged reefs, by contrast, can become noticeably quieter as marine life disappears."],
-["B","This difference has inspired an unusual restoration technique. Marine biologists place underwater speakers near damaged reef areas and play recordings taken from healthier reefs. The aim is not to entertain divers but to attract young fish searching for suitable habitat."],
-["C","In several field experiments, reef patches exposed to healthy-reef sounds attracted more fish than comparable silent patches. Importantly, the technique did not create coral directly. Instead, researchers hoped that increasing fish activity would support ecological processes that make recovery more likely."],
-["D","The method has limits. If water quality remains poor or destructive fishing continues, sound alone cannot repair the ecosystem. There is also a risk that animals may be attracted to places that still cannot support them. For this reason, scientists describe acoustic enrichment as a tool that should be combined with habitat protection rather than used as a replacement for it."],
-["E","Another question is how long the effect lasts. A short burst of sound may bring fish into an area, but researchers still need to know whether those fish stay, reproduce and contribute to long-term recovery. Monitoring therefore continues long after the speakers are removed."],
-["F","The broader lesson is that restoration may depend not only on physical structures but also on sensory signals. Animals make decisions using information from sound, smell and light. Rebuilding an ecosystem may therefore require restoring some of those signals as well."]
-],
-questions:[
-qTF(27,"Healthy coral reefs are normally silent.","False","contrast","locate","Paragraph A says a healthy reef is not a quiet place."),
-qTF(28,"The speakers are intended primarily to entertain divers.","False","purpose","logic","Their stated aim is to attract young fish."),
-qTF(29,"Reef patches exposed to healthy-reef sounds attracted more fish in field experiments.","True","evidence","locate","Paragraph C reports exactly this result."),
-qTF(30,"The sound recordings directly create new coral.","False","causation","logic","The technique did not create coral directly."),
-qTF(31,"Scientists know that every fish attracted by sound remains permanently.","False","known/unknown","overinfer","Researchers still need to know whether the fish stay."),
-qText(32,"The recordings are taken from ___ reefs.","healthier","word completion","locate","Paragraph B says recordings taken from healthier reefs."),
-qText(33,"Scientists call the technique acoustic ___.","enrichment","technical term","vocab","Paragraph D uses 'acoustic enrichment'."),
-qText(34,"Sound alone cannot compensate for poor water quality or destructive ___.","fishing","detail completion","locate","Paragraph D mentions destructive fishing."),
-qText(35,"Researchers continue ___ after the speakers are removed.","monitoring","word completion","locate","Paragraph E states monitoring continues."),
-qMC(36,"What is one risk of acoustic enrichment?",["It may attract animals to unsuitable habitat","It makes water quality worse","It prevents fish reproduction","It permanently silences reefs"],"It may attract animals to unsuitable habitat","risk","logic","Paragraph D warns animals may be drawn to places that cannot support them."),
-qMC(37,"Why is habitat protection still required?",["Sound cannot solve every environmental problem","Speakers are too expensive","Fish do not respond to sound","Coral grows too rapidly"],"Sound cannot solve every environmental problem","limitation","logic","The method is a tool, not a replacement for habitat protection."),
-qMC(38,"What remains uncertain about the attracted fish?",["Whether they can hear sound","Whether they stay and reproduce","Whether they can swim","Whether they avoid divers"],"Whether they stay and reproduce","unknown detail","locate","Paragraph E states this uncertainty."),
-qMC(39,"What broader idea does the final paragraph introduce?",["Only physical structures matter","Sensory signals may also be important in restoration","Light is harmful to marine life","Smell is more important than sound"],"Sensory signals may also be important in restoration","main idea","logic","Paragraph F broadens restoration to sensory signals."),
-qMC(40,"Which title best reflects the passage?",["Why Reefs Must Be Silent","Using Sound as One Tool in Reef Restoration","The End of Coral Research","How Divers Communicate with Fish"],"Using Sound as One Tool in Reef Restoration","global main idea","logic","The passage presents acoustic enrichment as one restoration tool with limits.")
-]}
-];
-
-function qTF(n,q,a,point,err,exp){return{n,type:"tfng",q,a,point,err,exp,opts:["True","False","Not Given"]}}
-function qMC(n,q,opts,a,point,err,exp){return{n,type:"mcq",q,opts,a,point,err,exp}}
-function qText(n,q,a,point,err,exp){return{n,type:"text",q,a,point,err,exp}}
-
-const allQuestions=parts.flatMap(p=>p.questions);
-let activeQs=[],answers={},reviews={},currentPart=0,currentQ=1,endAt=0,startAt=0,timer=null,selectionRange=null,noteCount=0;
-
-function startExam(){
-  const len=+document.getElementById("lengthSelect").value;
-  const sp=+document.getElementById("startPart").value;
-  const startIndex=sp===1?0:sp===2?13:26;
-  activeQs=allQuestions.slice(startIndex,startIndex+len);
-  if(activeQs.length<len) activeQs=allQuestions.slice(0,len);
-  currentQ=activeQs[0].n;
-  currentPart=partForQ(currentQ);
-  const mins=len===40?60:len===20?30:15;
-  startAt=Date.now(); endAt=startAt+mins*60*1000;
-  document.getElementById("launcher").classList.add("hidden");
-  document.getElementById("exam").classList.remove("hidden");
-  renderPart();renderNav();startTimer();installSelectionTools();
+var labels={locate:"定位",vocab:"词汇",logic:"逻辑",overinfer:"过度推断",time:"时间压力"};
+function getHist(){try{return JSON.parse(localStorage.getItem("ieltsExamHistory")||"[]")}catch(e){return []}}
+function fmt(s){s=Number(s||0);return Math.floor(s/60)+"m "+(s%60)+"s"}
+function pct(n,d){return d?Math.round(n/d*100):0}
+function launch(){var l=document.getElementById("len").value,p=document.getElementById("part").value,g=document.getElementById("goal").value;localStorage.setItem("ieltsResearchGoal",g);location.href="exam.html?len="+encodeURIComponent(l)+"&part="+encodeURIComponent(p)}
+function escapeH(s){return String(s).replace(/[&<>"']/g,function(m){var map={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};return map[m]})}
+function refresh(){
+var h=getHist(),totalQ=0,totalC=0,errs={locate:0,vocab:0,logic:0,overinfer:0,time:0};
+h.forEach(function(x){totalQ+=Number(x.count||0);totalC+=Number(x.correct||0);Object.keys(errs).forEach(function(k){errs[k]+=Number((x.errs||{})[k]||0)})});
+document.getElementById("sessions").textContent=h.length;document.getElementById("questionsDone").textContent=totalQ;document.getElementById("accuracy").textContent=totalQ?pct(totalC,totalQ)+"%":"—";
+var weak="待采样",wk="",mx=0;Object.keys(errs).forEach(function(k){if(errs[k]>mx){mx=errs[k];wk=k;weak=labels[k]}});document.getElementById("weakness").textContent=weak;
+var acc=totalQ?totalC/totalQ:0,fill=totalQ?Math.min(100,Math.round(acc*100)):15;document.getElementById("readingFill").style.width=fill+"%";document.getElementById("readingState").textContent=totalQ<20?"Baseline":acc>=.85?"Strong":acc>=.7?"Developing":"Repair";
+var maxErr=Math.max(1,errs.locate,errs.vocab,errs.logic,errs.overinfer,errs.time);
+document.getElementById("errorBars").innerHTML=Object.keys(errs).map(function(k){return '<div class="errrow"><label>'+labels[k]+'</label><div class="errbar"><div class="errfill" style="width:'+Math.round(errs[k]/maxErr*100)+'%"></div></div><b>'+errs[k]+'</b></div>'}).join("");
+var rows=h.slice().reverse().slice(0,8).map(function(x){var w="—",m=0;Object.keys(x.errs||{}).forEach(function(k){if(x.errs[k]>m){m=x.errs[k];w=labels[k]}});return '<tr><td>'+new Date(x.date).toLocaleString()+'</td><td>'+x.count+'</td><td class="'+(x.acc>=75?"good":"bad")+'">'+x.acc+'%</td><td>'+fmt(x.elapsed)+'</td><td>'+w+'</td></tr>'}).join("");
+document.getElementById("historyRows").innerHTML=rows||'<tr><td colspan="5" class="empty">还没有训练记录。</td></tr>';
+var wrong=[];h.slice().reverse().forEach(function(x){(x.wrong||[]).forEach(function(w){if(wrong.length<12)wrong.push(w)})});
+document.getElementById("wrongList").innerHTML=wrong.length?wrong.map(function(w){return '<div class="wrongitem"><b>Q'+w.n+' · '+w.point+'</b><div class="wrongmeta"><span class="pill">'+(labels[w.err]||w.err)+'</span><span class="bad">你的答案：'+escapeH(w.user||"Blank")+'</span></div><p>正确答案：<span class="good">'+escapeH(w.answer)+'</span><br>'+escapeH(w.exp||"")+'</p></div>'}).join(""):'<div class="empty">完成新版机考后，这里会自动收集详细错题。</div>';
+var mt="先建立 Reading Baseline",tx="还没有足够数据。先跑一组 10 题，系统会根据错误类型决定下一轮训练方向。",act="建议：10题 · Part 1 · 标准训练",why="目标不是刷题量，而是找出第一条稳定的错误模式。";
+if(totalQ>=10){if(wk==="locate"){mt="当前主问题：定位路径不稳定";tx="先减少题干到证据句的定位成本，再谈做题速度。";act="建议：10题 · Part 1";why="做完重点检查关键词与同义替换定位。"}if(wk==="vocab"){mt="当前主问题：词汇命中不足";tx="你可能已经找到了句子，但关键含义没有稳定识别。";act="建议：10题 · Part 2";why="错题中的核心词进入 Vocabulary Factor 库。"}if(wk==="logic"){mt="当前主问题：逻辑判断";tx="重点观察范围、因果、比较、绝对词与限制条件。";act="建议：10题 · Part 2";why="这类错题需要逐条找证据，而不是只记答案。"}if(wk==="overinfer"){mt="当前主问题：过度推断";tx="文章没说，不等于可以用常识补全。下一轮重点盯 Not Given。";act="建议：10题 · Part 3";why="训练只依据文本证据这一条纪律。"}if(wk==="time"){mt="当前主问题：时间压力";tx="先看准确率是否已经稳定，再优化阅读与定位速度。";act="建议：20题 · 30分钟";why="使用更接近实战的时间窗口。"}}
+document.getElementById("missionTitle").textContent=mt;document.getElementById("missionText").textContent=tx;document.getElementById("missionAction").textContent=act;document.getElementById("missionWhy").textContent=why;
 }
-function partForQ(n){return n<=13?0:n<=26?1:2}
-function renderPart(){
-  const p=parts[currentPart];
-  const ranges=["1–13","14–26","27–40"];
-  document.getElementById("partTitle").textContent=`Part ${currentPart+1}`;
-  document.getElementById("partInstruction").textContent=`Read the text and answer questions ${ranges[currentPart]}.`;
-  document.getElementById("passageTitle").textContent=p.title;
-  document.getElementById("passageText").innerHTML=p.paras.map(x=>`<p><span class="para-label">${x[0]}</span>${x[1]}</p>`).join("");
-  document.getElementById("instructions").innerHTML=`<strong>Questions ${p.questions[0].n}–${p.questions[p.questions.length-1].n}</strong>Answer the questions. You may change an answer at any time before submitting.`;
-  document.getElementById("questions").innerHTML=p.questions.filter(q=>activeQs.some(a=>a.n===q.n)).map(renderQuestion).join("");
-  restoreAnswers();
-  setActiveQuestion(currentQ,false);
-  installSelectionTools();
-}
-function renderQuestion(q){
- let body="";
- if(q.type==="text"){
-   body=`<div style="margin:9px 0 0 30px">${q.q.replace("___",`<input class="answer-input" id="ans${q.n}" autocomplete="off" oninput="storeText(${q.n},this.value)">`)}</div>`;
- }else{
-   body=`<div class="opts">${q.opts.map((o,i)=>`<label class="opt"><input type="radio" name="ans${q.n}" value="${escapeAttr(o)}" onchange="storeChoice(${q.n},this.value)"> ${String.fromCharCode(65+i)}. ${o}</label>`).join("")}</div>`;
- }
- return `<div class="q" id="q${q.n}" onclick="setActiveQuestion(${q.n},false)"><div class="qhead"><span class="qnum">${q.n}</span><div>${q.type==="text"?"":q.q}</div></div>${body}<label class="review-check"><input type="checkbox" id="rev${q.n}" onchange="toggleReview(${q.n},this.checked)"> Review</label></div>`;
-}
-function escapeAttr(s){return s.replaceAll("&","&amp;").replaceAll('"',"&quot;")}
-function storeChoice(n,v){answers[n]=v;renderNav()}
-function storeText(n,v){answers[n]=v;renderNav()}
-function restoreAnswers(){
-  Object.entries(answers).forEach(([n,v])=>{
-    const q=allQuestions.find(x=>x.n==n); if(!q)return;
-    if(q.type==="text"){const el=document.getElementById("ans"+n);if(el)el.value=v}
-    else{document.querySelectorAll(`input[name="ans${n}"]`).forEach(el=>el.checked=el.value===v)}
-  });
-  Object.entries(reviews).forEach(([n,v])=>{const el=document.getElementById("rev"+n);if(el)el.checked=!!v});
-}
-function toggleReview(n,v){reviews[n]=v;renderNav()}
-function renderNav(){
- const nav=document.getElementById("bottomNav");let html="";
- [0,1,2].forEach(pi=>{
-   const qs=activeQs.filter(q=>partForQ(q.n)===pi);
-   if(!qs.length)return;
-   html+=`<span class="part-label">Part ${pi+1}:</span>`;
-   qs.forEach(q=>{
-     const cls=["qnav",answers[q.n]&&String(answers[q.n]).trim()?"answered":"",reviews[q.n]?"review":"",q.n===currentQ?"current":""].join(" ");
-     html+=`<button class="${cls}" onclick="goQuestion(${q.n})">${q.n}</button>`;
-   });
-   html+=`<span class="navspacer"></span>`;
- });
- html+=`<button class="navarrow" id="prevBtn" onclick="moveQ(-1)">←</button><button class="navarrow" onclick="moveQ(1)">→</button>`;
- nav.innerHTML=html;
-}
-function goQuestion(n){
- currentQ=n;const pi=partForQ(n);
- if(pi!==currentPart){currentPart=pi;renderPart()}else setActiveQuestion(n,true);
- renderNav();
-}
-function setActiveQuestion(n,scroll=true){
- document.querySelectorAll(".q").forEach(x=>x.classList.remove("active"));
- const el=document.getElementById("q"+n);if(el){el.classList.add("active");if(scroll)el.scrollIntoView({block:"center",behavior:"smooth"})}
- currentQ=n;renderNav();
-}
-function moveQ(d){
- const ix=activeQs.findIndex(q=>q.n===currentQ);const nx=Math.max(0,Math.min(activeQs.length-1,ix+d));goQuestion(activeQs[nx].n)
-}
-function startTimer(){
-  updateClock();timer=setInterval(updateClock,1000)
-}
-function updateClock(){
-  const ms=Math.max(0,endAt-Date.now()),sec=Math.ceil(ms/1000),min=Math.floor(sec/60),s=sec%60;
-  document.getElementById("clockText").textContent=min>0?`${min} minutes ${s?`${s} seconds `:""}left`:`${s} seconds left`;
-  if(ms<=0){clearInterval(timer);submitExam(true)}
-}
-function openHelp(){document.getElementById("helpModal").classList.remove("hidden")}
-function openSettings(){document.getElementById("settingsModal").classList.remove("hidden")}
-function closeModal(id){document.getElementById(id).classList.add("hidden")}
-function hideTest(){document.getElementById("hideScreen").classList.remove("hidden")}
-function resumeTest(){document.getElementById("hideScreen").classList.add("hidden")}
-function applySettings(){
- document.body.classList.remove("large","xlarge","warm","bluebg");
- const f=document.getElementById("fontSetting").value,b=document.getElementById("bgSetting").value;
- if(f)document.body.classList.add(f);if(b)document.body.classList.add(b)
-}
-
-/* draggable divider */
-const divider=document.getElementById("divider"),leftPane=document.getElementById("passagePane");
-let dragging=false;
-divider.addEventListener("mousedown",()=>{dragging=true;divider.classList.add("dragging")});
-window.addEventListener("mouseup",()=>{dragging=false;divider.classList.remove("dragging")});
-window.addEventListener("mousemove",e=>{
- if(!dragging)return;const wa=document.querySelector(".workarea").getBoundingClientRect();
- let pct=(e.clientX-wa.left)/wa.width*100;pct=Math.max(28,Math.min(72,pct));leftPane.style.width=pct+"%";
-});
-
-/* selection highlighter + notes */
-function installSelectionTools(){
-  document.getElementById("passagePane").onmouseup=(e)=>{
-    setTimeout(()=>{
-      const s=window.getSelection();if(!s||s.isCollapsed){hideSelectionMenu();return}
-      if(!document.getElementById("passageText").contains(s.anchorNode)){hideSelectionMenu();return}
-      selectionRange=s.getRangeAt(0).cloneRange();
-      const m=document.getElementById("selectionMenu");m.style.left=Math.min(e.clientX,window.innerWidth-130)+"px";m.style.top=Math.min(e.clientY+8,window.innerHeight-90)+"px";m.classList.remove("hidden");
-    },10)
-  }
-}
-function hideSelectionMenu(){document.getElementById("selectionMenu").classList.add("hidden")}
-function highlightSelection(){
- if(!selectionRange)return;
- try{const mark=document.createElement("span");mark.className="highlight";selectionRange.surroundContents(mark)}catch(e){}
- window.getSelection().removeAllRanges();hideSelectionMenu();selectionRange=null;
-}
-function makeNote(){
- if(!selectionRange)return;const rect=selectionRange.getBoundingClientRect();const n=document.createElement("div");n.className="note";n.id="note"+(++noteCount);
- n.style.left=Math.max(10,Math.min(rect.left,window.innerWidth-250))+"px";n.style.top=Math.max(70,Math.min(rect.bottom+10,window.innerHeight-180))+"px";
- n.innerHTML=`<div class="note-top"><span>Note</span><button onclick="this.closest('.note').remove()">×</button></div><textarea placeholder="Type a note..."></textarea>`;
- document.body.appendChild(n);hideSelectionMenu();window.getSelection().removeAllRanges();selectionRange=null;
-}
-document.addEventListener("mousedown",e=>{if(!e.target.closest("#selectionMenu"))hideSelectionMenu()});
-
-/* submit + diagnostic */
-function submitExam(auto){
- if(!auto){
-   const blank=activeQs.filter(q=>!answers[q.n]||!String(answers[q.n]).trim()).length;
-   const msg=blank?`You have ${blank} unanswered question(s). Submit anyway?`:"Submit this practice test?";
-   if(!confirm(msg))return;
- }
- clearInterval(timer);
- const elapsed=Math.floor((Date.now()-startAt)/1000);
- let correct=0,errs={locate:0,vocab:0,logic:0,overinfer:0,time:0},rows=[];
- activeQs.forEach(q=>{
-   const ua=(answers[q.n]||"").trim(),ok=normalize(ua)===normalize(q.a);
-   if(ok)correct++;else errs[q.err]=(errs[q.err]||0)+1;
-   rows.push({q,ua,ok});
- });
- const planned=activeQs.length===40?3600:activeQs.length===20?1800:900;
- if(elapsed>planned*.95 && correct/activeQs.length<.75)errs.time++;
- const acc=Math.round(correct/activeQs.length*100);
- const labels={locate:"定位",vocab:"词汇",logic:"逻辑",overinfer:"过度推断",time:"时间压力"};
- let weak="稳定",mx=0;Object.entries(errs).forEach(([k,v])=>{if(v>mx){mx=v;weak=labels[k]}});
- document.getElementById("exam").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
- document.getElementById("mAcc").textContent=acc+"%";document.getElementById("mRaw").textContent=`${correct}/${activeQs.length}`;
- document.getElementById("mTime").textContent=formatTime(elapsed);document.getElementById("mWeak").textContent=weak;
- document.getElementById("errGrid").innerHTML=Object.entries(errs).map(([k,v])=>`<div class="err"><small>${labels[k]}</small><b>${v}</b></div>`).join("");
- document.getElementById("reviewRows").innerHTML=rows.map(r=>`<tr><td>${r.q.n}</td><td>${r.q.point}</td><td class="${r.ok?"ok":"wrong"}">${escapeHTML(r.ua||"Blank")}</td><td>${escapeHTML(r.q.a)}</td><td>${r.ok?'<span class="ok">Correct</span>':escapeHTML(r.q.exp)}</td></tr>`).join("");
- const hist=JSON.parse(localStorage.getItem("ieltsExamHistory")||"[]");hist.push({date:new Date().toISOString(),count:activeQs.length,correct,acc,elapsed,errs});localStorage.setItem("ieltsExamHistory",JSON.stringify(hist));
-}
-function normalize(s){return String(s).trim().toLowerCase().replace(/[.。]$/,"")}
-function formatTime(s){return `${Math.floor(s/60)}m ${s%60}s`}
-function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+refresh();
 </script>
 </body>
 </html>
