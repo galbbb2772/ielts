@@ -21,9 +21,30 @@ button,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-colu
 .wrongitem{padding:11px 0;border-bottom:1px solid #203550}.wrongitem:last-child{border-bottom:0}.wrongitem b{font-size:12px}.wrongitem p{font-size:12px;color:#a9b9cb;line-height:1.5;margin:5px 0}.wrongmeta{display:flex;gap:7px;flex-wrap:wrap}.library{grid-column:1/-1}.libgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.lib{padding:14px;border:1px solid #243e60;background:#0b192b;border-radius:14px}.lib b{font-size:13px}.lib p{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0}.empty{padding:24px 8px;color:var(--muted);text-align:center}
 @media(max-width:1050px){.app{grid-template-columns:1fr}.side{display:none}.main{padding:18px}.hero,.kpis,.engines,.errors,.history,.wrongbox{grid-column:1/-1}.controls{grid-template-columns:1fr 1fr}.controls .btn{grid-column:1/-1}.libgrid{grid-template-columns:1fr}}
 @media(max-width:620px){.main{padding:12px}.top{flex-direction:column}.top h1{font-size:25px}.controls{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.engine{grid-template-columns:90px 1fr 60px}}
+
+.mode-switch{position:fixed;right:16px;top:12px;z-index:1000;display:flex;gap:4px;padding:4px;background:rgba(7,16,29,.9);border:1px solid #2b4666;border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.mode-switch button{border:0;background:transparent;color:#9fb0c5;padding:8px 12px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer}
+.mode-switch button.active{background:#e9f3fb;color:#0b2236}
+#examView{position:fixed;inset:0;background:#fff;z-index:900}
+#examFrame{width:100%;height:100%;border:0;display:block;background:#fff}
+#researchView.hidden,#examView.hidden{display:none!important}
+.research-note{grid-column:1/-1}
+.notegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.notebox{border:1px solid #243e60;background:#0b192b;border-radius:14px;padding:14px}
+.notebox label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
+.notebox textarea{width:100%;min-height:95px;resize:vertical;border:1px solid #2b486a;border-radius:10px;background:#091727;color:#fff;padding:10px;font:inherit}
+.journal-item{padding:12px 0;border-bottom:1px solid #203550}
+.journal-item:last-child{border-bottom:0}
+.journal-item b{font-size:12px}.journal-item p{margin:5px 0;color:#a9b9cb;font-size:12px;line-height:1.5}
+@media(max-width:620px){.mode-switch{right:8px;top:8px}.mode-switch button{padding:7px 9px}.notegrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<div class="mode-switch">
+  <button id="modeResearch" class="active" onclick="switchMode('research')">研究台</button>
+  <button id="modeExam" onclick="switchMode('exam')">机考实战</button>
+</div>
+<div id="researchView">
 <div class="app">
 <aside class="side">
 <div class="brand"><b>IELTS RESEARCH LAB</b><span>学习研究台 · V3</span></div>
@@ -32,13 +53,13 @@ button,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-colu
 <a class="nav" href="#errors">错因中心</a>
 <a class="nav" href="#history">实验记录</a>
 <a class="nav" href="#wrong">错题研究</a>
-<a class="nav" href="exam.html">机考模拟器 ↗</a>
+<a class="nav" href="javascript:void(0)" onclick="switchMode('exam')">机考模拟器 ↗</a>
 <div class="sidebox"><small>这里负责观察与研究；真实机考页面只负责做题。两边共用同一份本地训练数据。</small></div>
 </aside>
 <main class="main">
 <div class="top" id="overview">
 <div><div class="eyebrow">RESEARCH → TEST → REVIEW → ITERATE</div><h1>IELTS 学习研究台</h1><p>先看哪里出问题，再决定今天练什么；真正做题时切换到独立的机考界面。</p></div>
-<div class="actions"><a class="btn primary" href="exam.html">进入 IELTS 机考模拟</a><button class="btn" onclick="refresh()">刷新数据</button></div>
+<div class="actions"><a class="btn primary" href="javascript:void(0)" onclick="switchMode('exam')">进入 IELTS 机考模拟</a><button class="btn" onclick="refresh()">刷新数据</button></div>
 </div>
 <div class="grid">
 <section class="card hero">
@@ -67,18 +88,55 @@ button,select{font:inherit}.app{min-height:100vh;display:grid;grid-template-colu
 <section class="card section errors" id="errors"><div class="head"><div><h3>错因暴露</h3><span>累计错误分布</span></div></div><div id="errorBars"></div></section>
 <section class="card section history" id="history"><div class="head"><div><h3>最近实验记录</h3><span>每一轮机考就是一次 Forward 样本。</span></div></div><div class="tablewrap"><table><thead><tr><th>时间</th><th>题数</th><th>正确率</th><th>用时</th><th>主要错因</th></tr></thead><tbody id="historyRows"></tbody></table></div></section>
 <section class="card section wrongbox" id="wrong"><div class="head"><div><h3>最近错题研究</h3><span>从新版机考记录开始保存详细错题。</span></div></div><div id="wrongList"></div></section>
-<section class="card section library"><div class="head"><div><h3>当前题库</h3><span>原创 IELTS 风格材料；考试阶段不显示解析。</span></div><a class="btn" href="exam.html">打开题库做题</a></div>
+
+<section class="card section research-note" id="journal">
+  <div class="head"><div><h3>研究日志</h3><span>与机考日志分开保存，但可以引用最近一次机考结果。</span></div><span class="pill">Research Journal</span></div>
+  <div class="notegrid">
+    <div class="notebox">
+      <label>我认为这次真正的问题是什么？</label>
+      <textarea id="researchProblem" placeholder="例：不是看不懂文章，而是 False / Not Given 会用常识补充。"></textarea>
+    </div>
+    <div class="notebox">
+      <label>下一轮要验证什么？</label>
+      <textarea id="researchNext" placeholder="例：下一轮只做 TFNG，强制每题找到证据句后再判断。"></textarea>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    <button class="btn primary" onclick="saveResearchNote()">保存研究记录</button>
+    <button class="btn" onclick="fillFromLatest()">引用最近一次机考数据</button>
+  </div>
+  <div id="journalList" style="margin-top:12px"></div>
+</section>
+<section class="card section library"><div class="head"><div><h3>当前题库</h3><span>原创 IELTS 风格材料；考试阶段不显示解析。</span></div><a class="btn" href="javascript:void(0)" onclick="switchMode('exam')">打开题库做题</a></div>
 <div class="libgrid"><div class="lib"><b>The Quiet City Experiment</b><p>城市规划 / 环境心理学。覆盖 TFNG、细节定位、因果限制、填空。</p></div><div class="lib"><b>Why Memory Likes Friction</b><p>学习科学 / 记忆。覆盖绝对词、概念定义、同义替换和因果。</p></div><div class="lib"><b>Rebuilding Reefs with Sound</b><p>海洋生态。覆盖目的、风险、已知/未知判断与主旨。</p></div></div>
 </section>
 </div>
 </main>
 </div>
+</div>
+<div id="examView" class="hidden">
+  <iframe id="examFrame" src="exam.html" title="IELTS Computer Practice"></iframe>
+</div>
 <script>
+function switchMode(mode,examUrl){
+  var rv=document.getElementById("researchView"),ev=document.getElementById("examView");
+  var rb=document.getElementById("modeResearch"),eb=document.getElementById("modeExam");
+  if(mode==="exam"){
+    if(examUrl) document.getElementById("examFrame").src=examUrl;
+    rv.classList.add("hidden");ev.classList.remove("hidden");rb.classList.remove("active");eb.classList.add("active");
+    history.replaceState(null,"","#exam");
+  }else{
+    ev.classList.add("hidden");rv.classList.remove("hidden");eb.classList.remove("active");rb.classList.add("active");
+    history.replaceState(null,"","#research");refresh();renderJournal();
+  }
+}
+window.addEventListener("message",function(e){if(e.data&&e.data.type==="IELTS_EXAM_SUBMITTED"){refresh();renderJournal();}});
+window.addEventListener("DOMContentLoaded",function(){if(location.hash==="#exam")switchMode("exam");else switchMode("research");});
 var labels={locate:"定位",vocab:"词汇",logic:"逻辑",overinfer:"过度推断",time:"时间压力"};
 function getHist(){try{return JSON.parse(localStorage.getItem("ieltsExamHistory")||"[]")}catch(e){return []}}
 function fmt(s){s=Number(s||0);return Math.floor(s/60)+"m "+(s%60)+"s"}
 function pct(n,d){return d?Math.round(n/d*100):0}
-function launch(){var l=document.getElementById("len").value,p=document.getElementById("part").value,g=document.getElementById("goal").value;localStorage.setItem("ieltsResearchGoal",g);location.href="exam.html?len="+encodeURIComponent(l)+"&part="+encodeURIComponent(p)}
+function launch(){var l=document.getElementById("len").value,p=document.getElementById("part").value,g=document.getElementById("goal").value;localStorage.setItem("ieltsResearchGoal",g);switchMode("exam","exam.html?len="+encodeURIComponent(l)+"&part="+encodeURIComponent(p))}
 function escapeH(s){return String(s).replace(/[&<>"']/g,function(m){var map={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};return map[m]})}
 function refresh(){
 var h=getHist(),totalQ=0,totalC=0,errs={locate:0,vocab:0,logic:0,overinfer:0,time:0};
@@ -96,7 +154,27 @@ var mt="先建立 Reading Baseline",tx="还没有足够数据。先跑一组 10 
 if(totalQ>=10){if(wk==="locate"){mt="当前主问题：定位路径不稳定";tx="先减少题干到证据句的定位成本，再谈做题速度。";act="建议：10题 · Part 1";why="做完重点检查关键词与同义替换定位。"}if(wk==="vocab"){mt="当前主问题：词汇命中不足";tx="你可能已经找到了句子，但关键含义没有稳定识别。";act="建议：10题 · Part 2";why="错题中的核心词进入 Vocabulary Factor 库。"}if(wk==="logic"){mt="当前主问题：逻辑判断";tx="重点观察范围、因果、比较、绝对词与限制条件。";act="建议：10题 · Part 2";why="这类错题需要逐条找证据，而不是只记答案。"}if(wk==="overinfer"){mt="当前主问题：过度推断";tx="文章没说，不等于可以用常识补全。下一轮重点盯 Not Given。";act="建议：10题 · Part 3";why="训练只依据文本证据这一条纪律。"}if(wk==="time"){mt="当前主问题：时间压力";tx="先看准确率是否已经稳定，再优化阅读与定位速度。";act="建议：20题 · 30分钟";why="使用更接近实战的时间窗口。"}}
 document.getElementById("missionTitle").textContent=mt;document.getElementById("missionText").textContent=tx;document.getElementById("missionAction").textContent=act;document.getElementById("missionWhy").textContent=why;
 }
-refresh();
+
+function getJournal(){try{return JSON.parse(localStorage.getItem("ieltsResearchJournal")||"[]")}catch(e){return []}}
+function saveResearchNote(){
+  var problem=document.getElementById("researchProblem").value.trim(),next=document.getElementById("researchNext").value.trim();
+  if(!problem&&!next)return;
+  var h=getHist(),last=h.length?h[h.length-1]:null,j=getJournal();
+  j.push({date:new Date().toISOString(),problem:problem,next:next,exam:last?{date:last.date,count:last.count,acc:last.acc,elapsed:last.elapsed,errs:last.errs}:null});
+  localStorage.setItem("ieltsResearchJournal",JSON.stringify(j));
+  document.getElementById("researchProblem").value="";document.getElementById("researchNext").value="";renderJournal();
+}
+function fillFromLatest(){
+  var h=getHist();if(!h.length)return;
+  var x=h[h.length-1],w="暂无明显集中错因",mx=0,wk="";
+  Object.keys(x.errs||{}).forEach(function(k){if(x.errs[k]>mx){mx=x.errs[k];wk=k;w=labels[k]}});
+  document.getElementById("researchProblem").value="最近一次："+x.count+"题，正确率 "+x.acc+"%，用时 "+fmt(x.elapsed)+"；主要暴露："+w+"。";
+}
+function renderJournal(){
+  var j=getJournal().slice().reverse().slice(0,8),box=document.getElementById("journalList");if(!box)return;
+  box.innerHTML=j.length?j.map(function(x){var exam=x.exam?'<span class="pill">'+x.exam.count+'题 · '+x.exam.acc+'%</span>':'';return '<div class="journal-item"><b>'+new Date(x.date).toLocaleString()+' '+exam+'</b><p><strong>问题：</strong>'+escapeH(x.problem||"—")+'<br><strong>下一轮：</strong>'+escapeH(x.next||"—")+'</p></div>'}).join(""):'<div class="empty">还没有研究记录。做完一轮机考后，在这里写你的判断与下一轮假设。</div>';
+}
+refresh();renderJournal();
 </script>
 </body>
 </html>
